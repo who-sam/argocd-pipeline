@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: hello-app
-          image: ahmedlebshten/helloapp:latest
+          image: whosam1/hello-artifacts:latest
           ports:
             - containerPort: 80
 ---
