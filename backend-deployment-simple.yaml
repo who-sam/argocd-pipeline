@@ -7,11 +7,6 @@ metadata:
     app: backend
 spec:
   replicas: 2
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
   selector:
     matchLabels:
       app: backend
@@ -20,24 +15,21 @@ spec:
       labels:
         app: backend
     spec:
+      initContainers:
+      - name: wait-for-postgres
+        image: busybox:1.35
+        command: ['sh', '-c', 'until nc -z postgres-service 5432; do echo waiting for postgres; sleep 2; done;']
       containers:
       - name: backend
         image: whosam1/notes-app-backend:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
-          name: http
         env:
         - name: DB_HOST
-          valueFrom:
-            secretKeyRef:
-              name: postgres-secrets
-              key: DB_HOST
+          value: "postgres-service"
         - name: DB_PORT
-          valueFrom:
-            secretKeyRef:
-              name: postgres-secrets
-              key: DB_PORT
+          value: "5432"
         - name: DB_USER
           valueFrom:
             secretKeyRef:
@@ -59,12 +51,7 @@ spec:
               name: postgres-secrets
               key: JWT_SECRET
         - name: PORT
-          valueFrom:
-            secretKeyRef:
-              name: postgres-secrets
-              key: PORT
-        - name: ENV
-          value: "production"
+          value: "8080"
         resources:
           requests:
             memory: "128Mi"
@@ -72,24 +59,3 @@ spec:
           limits:
             memory: "256Mi"
             cpu: "200m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 3
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 8080
-          initialDelaySeconds: 5
-          periodSeconds: 5
-          timeoutSeconds: 3
-          failureThreshold: 3
-      # Wait for postgres to be ready
-      initContainers:
-      - name: wait-for-postgres
-        image: busybox:1.35
-        command: ['sh', '-c', 'until nc -z postgres-service 5432; do echo waiting for postgres; sleep 2; done;']

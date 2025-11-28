@@ -6,7 +6,7 @@ metadata:
   labels:
     app: backend
 spec:
-  type: ClusterIP
+  type: LoadBalancer  # This will create an AWS Classic Load Balancer automatically
   ports:
   - port: 8080
     targetPort: 8080
@@ -14,7 +14,3 @@ spec:
     name: http
   selector:
     app: backend
-  sessionAffinity: ClientIP
-  sessionAffinityConfig:
-    clientIP:
-      timeoutSeconds: 10800
