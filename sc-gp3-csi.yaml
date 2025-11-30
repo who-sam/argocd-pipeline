@@ -1,11 +1,14 @@
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: gp3-csi
+  name: gp3
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"  # Make it the default
 provisioner: ebs.csi.aws.com
 parameters:
   type: gp3
+  # encrypted: "true"  # Enable encryption (recommended)
+  # fsType: ext4
 volumeBindingMode: WaitForFirstConsumer
 reclaimPolicy: Delete
 allowVolumeExpansion: true
-
